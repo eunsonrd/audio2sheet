@@ -196,12 +196,3 @@ elif not lyrics_out.strip():
 st.divider()
 st.info("💡 Tip: One line of lyrics = one staff. Use the buttons to add [Verse] and [Chorus] headers!")
 
-
-
-Sent from my iPad
-
-On 25 Oct 2026, at 21:53, Richard Eunson <richard.eunson1@gmail.com> wrote:
-
-FPDFUnicodeEncodingException: Character "𝄞" at index 0 in text is outside the 
-range of characters supported by the font used: "helveticaB". Please consider 
-using a Unicode font.
