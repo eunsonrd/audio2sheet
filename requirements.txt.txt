@@ -1,5 +1,5 @@
 streamlit>=1.35.0
-openai-whisper>=20231117
+git+https://github.com/openai/whisper.git
 librosa>=0.10.1
 basic-pitch>=0.3.0
 fpdf2>=2.7.0
