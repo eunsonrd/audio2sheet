@@ -1,3 +1,4 @@
+
 import streamlit as st
 from fpdf import FPDF
 import os
@@ -6,7 +7,7 @@ import tempfile
 # Page setup
 st.set_page_config(page_title="Lyrics & Sheet Music PDF", page_icon="🎵")
 st.title("🎵 Lyrics + Blank Staves PDF")
-st.write("Type or paste your lyrics → Get a clean PDF with blank staves above each line!")
+st.write("Type or paste your lyrics → Get a clean PDF with blank staves + clef symbols!")
 
 # ─────────── HELPER FUNCTIONS ───────────
 def split_lines(text):
@@ -40,9 +41,27 @@ def add_chorus(text):
         out.append(line)
     return "\n".join(out)
 
+# ─────────── PDF CLASS WITH UNICODE FONT ───────────
+class UnicodePDF(FPDF):
+    def __init__(self):
+        super().__init__()
+        # Add DejaVu Sans — free, built-in Unicode font that supports music symbols
+        self.add_font("DejaVu", "", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", uni=True)
+        self.add_font("DejaVu", "B", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", uni=True)
+    
+    def header(self):
+        self.set_font("DejaVu", "B", 18)
+        self.cell(0, 12, title, ln=True, align="C")
+        self.ln(3)
+        self.set_font("DejaVu", "", 10)
+        self.set_text_color(100, 100, 100)
+        self.cell(0, 6, "Write your notes on the staves below", ln=True, align="C")
+        self.set_text_color(0, 0, 0)
+        self.ln(5)
+
 # ─────────── PDF DRAWING FUNCTIONS ───────────
 def draw_staff(pdf, clef="treble"):
-    """Draw one blank staff with clef label"""
+    """Draw one blank staff with clef symbol"""
     line_y = pdf.get_y()
     
     # Staff lines — 5 horizontal lines
@@ -50,12 +69,12 @@ def draw_staff(pdf, clef="treble"):
         y_line = line_y + (i * 2.5)
         pdf.line(25, y_line, 190, y_line)
     
-    # Clef label (text instead of symbol)
-    pdf.set_font("Arial", "B", 10)
+    # Clef symbol — using DejaVu font
+    pdf.set_font("DejaVu", "", 16)
     if clef == "treble":
-        pdf.text(12, line_y + 8, "𝄞 TREBLE")
+        pdf.text(12, line_y + 9, "𝄞")
     elif clef == "bass":
-        pdf.text(12, line_y + 8, "𝄢 BASS")
+        pdf.text(12, line_y + 9, "𝄢")
     
     # Bar lines
     pdf.line(25, line_y, 25, line_y + 10)
@@ -72,8 +91,8 @@ def draw_double_staff(pdf):
     for i in range(5):
         y_line = line_y + (i * 2.5)
         pdf.line(25, y_line, 190, y_line)
-    pdf.set_font("Arial", "B", 9)
-    pdf.text(10, line_y + 8, "TREBLE")
+    pdf.set_font("DejaVu", "", 16)
+    pdf.text(10, line_y + 9, "𝄞")
     
     # Space between staves
     mid_gap = line_y + 14
@@ -82,7 +101,7 @@ def draw_double_staff(pdf):
     for i in range(5):
         y_line = mid_gap + (i * 2.5)
         pdf.line(25, y_line, 190, y_line)
-    pdf.text(14, mid_gap + 8, "BASS")
+    pdf.text(14, mid_gap + 9, "𝄢")
     
     # Bar lines
     pdf.line(25, line_y, 25, mid_gap + 10)
@@ -129,20 +148,9 @@ clef_choice = st.radio("Clef to display:", ["Treble Clef", "Bass Clef", "Grand S
 if st.button("✨ Generate PDF", type="primary") and lyrics_out.strip():
     with st.spinner("Creating your PDF..."):
         
-        class SheetPDF(FPDF):
-            def header(self):
-                self.set_font("Arial", "B", 18)
-                self.cell(0, 12, title, ln=True, align="C")
-                self.ln(3)
-                self.set_font("Arial", "I", 10)
-                self.set_text_color(100, 100, 100)
-                self.cell(0, 6, "Write your notes on the staves below", ln=True, align="C")
-                self.set_text_color(0, 0, 0)
-                self.ln(5)
-        
-        pdf = SheetPDF()
+        pdf = UnicodePDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
+        pdf.set_font("DejaVu", "", 12)
         
         # Choose drawing function
         if clef_choice == "Treble Clef":
@@ -162,9 +170,9 @@ if st.button("✨ Generate PDF", type="primary") and lyrics_out.strip():
             # Section header (Verse/Chorus)
             if line.startswith("[") and line.endswith("]"):
                 pdf.ln(4)
-                pdf.set_font("Arial", "B", 11)
+                pdf.set_font("DejaVu", "B", 11)
                 pdf.cell(0, 8, line, ln=True)
-                pdf.set_font("Arial", size=12)
+                pdf.set_font("DejaVu", "", 12)
                 continue
             
             # Blank staff
@@ -188,11 +196,15 @@ if st.button("✨ Generate PDF", type="primary") and lyrics_out.strip():
             )
         
         os.unlink(output_path)
-        st.success("✅ Done! Your PDF is ready — enjoy writing your music! 🎵")
+        st.success("✅ Done! Your PDF has proper clef symbols: 𝄞 treble & 𝄢 bass 🎵")
 
 elif not lyrics_out.strip():
     st.info("👆 Type some lyrics above, then click Generate PDF!")
 
 st.divider()
-st.info("💡 Tip: One line of lyrics = one staff. Use the buttons to add [Verse] and [Chorus] headers!")
+st.info("💡 Tip: One line of lyrics = one staff. Clef symbols now display correctly!")
+
+
+
+
 
