@@ -4,5 +4,6 @@ openai-whisper>=20231117
 librosa>=0.10.1
 basic-pitch>=0.3.0
 fpdf2>=2.7.0
+PyPDF2>=3.0.0
 torch>=2.0.0
 numpy<2.0.0
