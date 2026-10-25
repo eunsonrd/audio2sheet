@@ -1,7 +1,0 @@
-streamlit>=1.35.0
-git+https://github.com/openai/whisper.git
-librosa>=0.10.1
-basic-pitch>=0.3.0
-fpdf2>=2.7.0
-torch>=2.0.0
-numpy<2.0.0
