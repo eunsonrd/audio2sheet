@@ -121,9 +121,7 @@ if audio_file:
     st.subheader("🎼 Melody Notes")
     with st.spinner("🎵 Detecting melody..."):
         _, _, note_events = predict(
-            tmp_path,
-            model_path=ICASSP_2022_MODEL_PATH
-        )
+            tmp_path)
         melody_text = notes_to_text(note_events[:48])
         st.text(melody_text)
 
